@@ -61,56 +61,16 @@ sudo date &>/dev/null
 clear
 echo
 rm -fr $cwd/sdb64
-
 echo -e "\e[0m"
-
- #
- # the install script only works for debian / fedora or distros based on debian / fedora
- #is_debian=0
- #is_fedora=0
-
- #id=$(awk -F= '$1=="ID" {gsub("\"","", $2); print $2 ;}' /etc/os-release)
- #
- #id_like=$(awk -F= '$1=="ID_LIKE" {gsub("\"","", $2); print $2 ;}' /etc/os-release)
- #
- #distro=$(awk -F= '$1=="NAME" {gsub("\"","", $2); print $2 ;}' /etc/os-release)
-
- #if [[ -z "$id_like" ]]; then
- # must be debian or fedora
- #  case $id in
- #      "debian" ) echo "Distro is: Debian."
- #                 is_debian=1;;
- #      "fedora" ) echo "Distro is: Fedora."
- #                 is_fedora=1;;
- #      * ) echo "Distro is: " $distro
- #          echo "Defaulting to Debian YMMV."
- #          is_debian=1;;
- #  esac
-
- # else
- # a derivative of debian or fedora
- #  case $id_like in
- #      "debian" ) echo "Distro is: "$distro "."
- #                 echo "Treat  as: Debian."
- #                 is_debian=1;;
- #      "fedora" ) echo "Distro is: "$distro "."
- #                echo "Treat  as: Fedora."
- #                 is_fedora=1;;
- #      * ) echo "Distro is: " $distro
- #          echo "Defaulting to Debian YMMV."
- #          is_debian=1;;
- #  esab
- #fi
-
- #
- is_debian=0
- is_fedora=0
+# Ask for distribution type
+is_debian=0
+is_fedora=0
 echo -e "\e[93m" 
 echo " Enter <D> if you are installing on a Debian or Ubuntu based distribution."
 echo " Enter <F> if you are installing on a Fedora Based distribution."
 echo " Or press return to exit the installer."
 echo
-read -p "Continue? (D/f) " yn
+read -p "Continue? (d/f) " yn
 echo -e "\e[0m"
 case $yn in
     [dD] ) is_debian=1;;
