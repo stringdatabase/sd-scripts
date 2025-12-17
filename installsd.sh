@@ -330,6 +330,9 @@ sudo chown -R sdsys:sdusers $sdsysdir/terminfo
  sudo systemctl enable sd.service
  sudo systemctl enable sdclient.socket
 
+ sudo $sdsysdir/bin/sd -start
+ sudo $sdsysdir/bin/sd -stop
+
  echo
  echo Compiling terminfo database
  sudo $cwd/sdb64/sd64/bin/sdtic -v $cwd/sdb64/sd64/terminfo.src
@@ -345,8 +348,7 @@ sudo chown -R sdsys:sdusers $sdsysdir/terminfo
  echo -e "\e[91mThe SD server is installed.\e[33m"
  echo "---------------------------"
  echo
- echo -e "\e[92m"
- echo "The temporary source code directory used during the install"
+ echo -e "\e[92mThe temporary source code directory used during the install"
  echo "has been deleted."
  echo
  echo "The deletesd.sh script has been copied to the current directory."
@@ -363,8 +365,7 @@ sudo chown -R sdsys:sdusers $sdsysdir/terminfo
  echo -e "After rebooting, open a terminal and enter \'sd\' "
  echo "to connect to your sd home directory."
  echo
- echo
- echo -e "\e[0m-----------------------------------------------------"
+ echo -e "\e[0m------------------------------------------------------"
  echo -e "\e[93m"
  read -p "Restart Computer? (y/N) " yn
  echo -e "\e[0m"
