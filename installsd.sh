@@ -1,14 +1,14 @@
  #!/bin/bash
  #   SD bash install script
- #   (c) 2023-2025 Donald Montaine and Mark Buller
+ #   (c) 2023-2026 Donald Montaine and Mark Buller
  #   This software is released under the Blue Oak Model License
  #   a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
  #
- #   rev 0.9-4 Dec 16       manual choice of distro rather they trying to determine automatically
- #   rev 0.9-3 Nov 25       update script to install from repo
+ #   rev 0.9-4 Dec 16 dsm - manual choice of distro rather they trying to determine automatically
+ #   rev 0.9-2 Nov 27 dsm - create one-stop install script
+ #   rev 0.9-3 Nov 25 mab   update script to install from repo
  #                          move voc back to dynamic file
  #                          correct ownership issue with /home/sd when re installing and /home/sd already exists
- #   rev 0.9-2 Nov 27 dsm - create one-stop install script
  #   rev 0.9-1 Apr 25 mab - replace lsb_release with /etc/os-release - not installed by default on Fedora
  #   rev 0.9-1 Mar 25 mab - create generic install script and make corrections needed for Raspberry install
  #   rev 0.9-1 Mar 25 mab - add optional install of TAPE / RESTORE subsystem
