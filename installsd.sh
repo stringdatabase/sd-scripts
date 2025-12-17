@@ -329,7 +329,8 @@ sudo chown -R sdsys:sdusers $sdsysdir/terminfo
  sudo systemctl start sdclient.socket
  sudo systemctl enable sd.service
  sudo systemctl enable sdclient.socket
-
+ 
+ sudo $sdsysdir/bin/sd -stop
  sudo $sdsysdir/bin/sd -start
  sudo $sdsysdir/bin/sd -stop
 
