@@ -4,6 +4,7 @@
  #   This software is released under the Blue Oak Model License
  #   a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
  #
+ #   rev 0.9-4 Dec 16       manual choice of distro rather they trying to determine automatically
  #   rev 0.9-3 Nov 25       update script to install from repo
  #                          move voc back to dynamic file
  #                          correct ownership issue with /home/sd when re installing and /home/sd already exists
