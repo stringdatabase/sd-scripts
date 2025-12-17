@@ -68,7 +68,7 @@ is_fedora=0
 echo -e "\e[93m" 
 echo " Enter <D> if you are installing on a Debian or Ubuntu based distribution."
 echo " Enter <F> if you are installing on a Fedora Based distribution."
-echo " Or press return to exit the installer."
+echo " Or press enter with no entry to exit the installer."
 echo
 read -p "Continue? (d/f) " yn
 echo -e "\e[0m"
@@ -113,11 +113,11 @@ esac
      read -p "Install the <M>ain or <D>evelopment version? (M/d) " md
      echo -e "\e[0m"
      case $md in
-         [mM] ) echo "Installing the main version"
+         [mM] ) echo "Installing the main version."
                 git clone -b main $REPO_URL;;
-         [dD] ) echo "Installing the development version"
+         [dD] ) echo "Installing the development version."
                 git clone -b dev $REPO_URL;;
-         * )    echo "Installing the main version"
+         * )    echo "Installing the main version."
                 git clone -b main $REPO_URL;;
      esac
  else
