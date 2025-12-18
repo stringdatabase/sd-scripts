@@ -322,7 +322,8 @@ sudo chown -R sdsys:sdusers $sdsysdir/terminfo
  echo
  echo Stopping sd
  sudo $sdsysdir/bin/sd -stop
-
+ sleep 1
+ 
  echo
  echo Enabling services
  sudo systemctl start sd.service
@@ -330,8 +331,11 @@ sudo chown -R sdsys:sdusers $sdsysdir/terminfo
  sudo systemctl enable sd.service
  sudo systemctl enable sdclient.socket
  
+ sleep 1
  sudo $sdsysdir/bin/sd -stop
+ sleep 1
  sudo $sdsysdir/bin/sd -start
+ sleep 1
  sudo $sdsysdir/bin/sd -stop
 
  echo
