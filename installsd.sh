@@ -4,6 +4,7 @@
  #   This software is released under the Blue Oak Model License
  #   a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
  #
+ #   rev 1.0-0 Dec 25 dsm - modified to handle Arch based distributions
  #   rev 0.9-4 Dec 16 dsm - manual choice of distro rather they trying to determine automatically
  #   rev 0.9-2 Nov 27 dsm - create one-stop install script
  #   rev 0.9-3 Nov 25 mab   update script to install from repo
@@ -37,9 +38,9 @@ echo -e "\e[91mSD installer\e[0m"
 echo -----------------------
 echo
 echo -e "\e[92mFor this install script to work you must have sudo installed"
-echo "and be a member of the sudo group."
+echo "and be a member of the sudo group.  Also, systemd must be enabled."
 echo
-echo "Installer tested on Ubuntu 24.04, Debian 13 and Fedora 43."
+echo "Installer tested on Debian 13, Fedora 43, Manjaro 25 and Ubuntu 24.04."
 echo
 echo "This script will download the SD source code, compile and install SD."
 echo
@@ -49,6 +50,7 @@ echo
 
 echo -e "\e[93m" 
 read -p "Continue? (y/N) " yn
+echo -e "\e"
 case $yn in
     [yY] ) echo;;
     [nN] ) exit;;
@@ -63,21 +65,39 @@ echo
 rm -fr $cwd/sdb64
 echo -e "\e[0m"
 # Ask for distribution type
+is_arch=0
 is_debian=0
 is_fedora=0
-echo -e "\e[93m" 
+echo -e "\e[92mChoose your distribution."
+echo
+echo " Enter <A> if you are istalling on an Arch based distribution." 
 echo " Enter <D> if you are installing on a Debian or Ubuntu based distribution."
 echo " Enter <F> if you are installing on a Fedora Based distribution."
 echo " Or press enter with no entry to exit the installer."
-echo
-read -p "Continue? (d/f) " yn
+echo -e "\e[93m"
+read -p "Continue? (a/d/f) " adf
 echo -e "\e[0m"
-case $yn in
+case $adf in
+    [aA] ) is_arch=1;;
     [dD] ) is_debian=1;;
     [fF] ) is_fedora=1;;
     * ) exit ;;
 esac
  # package installer is based on distro, clunky but easy to read
+ if [ $is_arch -eq 1 ]; then
+     sudo pacman -S git base-devel micro lynx libbsd libsodium openssh python
+     if [ $? -ne 0 ]; then
+         echo -e "\e[91m"
+         echo "Package installation using pacman failed.  Exiting script."
+         echo "Verify your internet connection and then try again."
+         echo -e "\e[0m"
+         exit
+     else   
+         sudo systemctl start sshd
+         sudo systemctl enable sshd
+     fi
+ fi
+ #
  if [ $is_debian -eq 1 ]; then
      sudo apt-get -y install git build-essential micro lynx libbsd-dev libsodium-dev openssh-server python3-dev
      if [ $? -ne 0 ]; then
@@ -104,7 +124,7 @@ esac
  REPO_URL="https://github.com/stringdatabase/sdb64" # Replace with the actual repository URL
  echo "using repo at: $REPO_URL"
  # Attempt to list remote references silently
- git ls-remote -q "$REPO_URL" &>/dev/null
+  git ls-remote -q "$REPO_URL" &>/dev/null
  # Check the exit status of the previous command
  if [[ $? -eq 0 ]]; then
      echo "The Github repository at github.com is available."
@@ -349,7 +369,7 @@ sudo chown -R sdsys:sdusers $sdsysdir/terminfo
 
  # display end of script message
  echo
- echo -----------------------------------------------------
+ echo ---------------------------------------------------------------
  echo -e "\e[91mThe SD server is installed.\e[33m"
  echo "---------------------------"
  echo
@@ -366,11 +386,13 @@ sudo chown -R sdsys:sdusers $sdsysdir/terminfo
  echo
  echo "Reboot to assure that group memberships are updated"
  echo "and the APIsrvr Service is enabled."
+ echo "Note: In rare cases it requires two reboots for sd to autostart"
+ 
  echo
  echo -e "After rebooting, open a terminal and enter \'sd\' "
  echo "to connect to your sd home directory."
  echo
- echo -e "\e[0m------------------------------------------------------"
+ echo -e "\e[0m----------------------------------------------------------------"
  echo -e "\e[93m"
  read -p "Restart Computer? (y/N) " yn
  echo -e "\e[0m"
