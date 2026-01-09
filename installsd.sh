@@ -142,7 +142,7 @@ echo "using repo at: $REPO_URL"
 # Attempt to list remote references silently
  git ls-remote -q "$REPO_URL" &>/dev/null
 # Check the exit status of the previous command
-if [[ $? -eq 0 ]]; then
+if [ $? -eq 0 ]; then
     echo "The Github repository at github.com is available."
     echo "Creating temporary source code repository."
     echo -e "\e[93m"
