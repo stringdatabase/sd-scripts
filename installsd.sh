@@ -126,7 +126,7 @@ if [ $is_fedora -eq 1 ]; then
 fi
 #
 if [ $is_suse -eq 1 ]; then
-    sudo sudo zypper --non-interactive install git make automake gcc gcc-c++ kernel-default-devel micro-editor lynx libbsd-devel libsodium-devel openssh python3-devel
+    sudo zypper --non-interactive install git make automake gcc gcc-c++ kernel-default-devel micro-editor lynx libbsd-devel libsodium-devel openssh python3-devel
     if [ $? -ne 0 ]; then
         echo -e "\e[91m"
         echo "Package installation using zypper failed.  Exiting script."
