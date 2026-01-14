@@ -1,12 +1,13 @@
 #!/bin/bash
 #
-# 	SD bash delete script
-# 	(c) 2023 Donald Montaine
-#	This software is released under the Blue Oak Model License
-#	a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
+# SD bash delete script
+# (c) 2023 Donald Montaine
+# This software is released under the Blue Oak Model License
+# a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
 #
-#   rev 0.9.4 Dec 11 2025 Add color
-#   rev 0.9.0 Jan 25 mab must remove group sdsys (no longer sdsys's pri group)
+# rev 1.0.1 Jan 14 2026 Add retain config file, change prompts for retention of ACCOUNTS
+# rev 0.9.4 Dec 11 2025 Add color
+# rev 0.9.0 Jan 25 2025 mab must remove group sdsys (no longer sdsys's pri group)
 #
 if [[ $EUID -eq 0 ]]; then
 	echo -e "\e[91mThis script must NOT be run as root.\e[0m" 1>&2
@@ -22,7 +23,7 @@ fi
 #
 clear
 echo -e "\e[91mREMOVE the SD Database Completely"
-echo "---------------------------------"
+echo    "---------------------------------------"
 echo -e "\e[93m"
 read -p "Continue? (y/N) " yn
 case $yn in
@@ -34,21 +35,43 @@ esac
 echo
 echo "If requested, enter your account password:"
 sudo date &>/dev/null
+
 echo
-echo -e "\e[92mDo you want to save /home/sd and all subdirectories."
-echo "WARNING: Choose 'R' to retain accounts for SD reinstallation."
-echo "         Choose 'D' will delete all SD User and Group accounts."
-echo 
+echo -e "\e[92mDo you want to save your existing accounts."
+echo "WARNING: Entering 'N' will delete all your exising accounts."
+echo         
 echo -e "\e[93m"
-read -p "Delete /home/sd? (R/d) " rd
-case $rd in
-	[dD] )  echo
-	        echo /home/sd Directory Deleted;
-			sudo rm -fr /home/sd;;
-	* )  
-	        echo
-		    echo Saving Accounts Directory;
-		    sudo mv /usr/local/sdsys/ACCOUNTS /home/sd;
+read -p "Keep your existing accounts? (Y/n) " yn
+case $yn in
+	[yY] )  echo
+		echo Accounts Directory Saved
+		sudo cp -r /usr/local/sdsys/ACCOUNTS /home/sd
+		ls /home/sd;;
+	[nN] )  echo
+	        echo /home/sd Directory Deleted
+		sudo rm -fr /home/sd;;
+	[*] )   echo
+		echo Accounts Directory Saved
+		sudo mv /usr/local/sdsys/ACCOUNTS /home/sd;;	        
+esac
+
+echo
+echo
+echo -e "\e[92mDo you want to save your existing SD configuration."
+echo "WARNING: Entering 'N' will delete your current configuration."
+echo        
+echo -e "\e[93m"
+read -p "Keep your existing configuration? (Y/n) " yn
+case $yn in
+	[Yy] )  echo
+		sudo mv /etc/sd.conf /home/sd
+		echo Configuration file saved;;
+	[nN] )  echo
+		sudo rm -fr /home/sd
+		echo Configuration file deleted;;
+	[*] )   echo
+		sudo mv /etc/sd.conf /home/sd
+		echo Configuration file saved;;
 esac
 echo -e "\e[0m"
 
