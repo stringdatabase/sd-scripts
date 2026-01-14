@@ -4,6 +4,7 @@
  #   This software is released under the Blue Oak Model License
  #   a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
  #
+ #   rev 1.0-1 Jan 14 dsm - added code to restore saved sd.conf file
  #   rev 1.0-0 Jan  8 dsm - slipstream to install on openSUSE and to use ~/.sdb64tmp as temporary
  #                          install directory and then delete it at end of install
  #   rev 1.0-0 Dec 25 dsm - modified to handle Arch based distributions
@@ -150,11 +151,11 @@ if [ $? -eq 0 ]; then
     echo -e "\e[0m"
     case $md in
         [mM] ) echo "Installing the main version."
-               git clone -b main $REPO_URL;;
+               git clone -b main $REPO_URL .sdb64tmp;;
         [dD] ) echo "Installing the development version."
-               git clone -b dev $REPO_URL;;
+               git clone -b dev $REPO_URL .sdb64tmp;;
         * )    echo "Installing the main version."
-               git clone -b main $REPO_URL;;
+               git clone -b main $REPO_URL .sdb64tmp;;
     esac
 else
     echo -e "\e[91m"
@@ -164,8 +165,7 @@ else
     exit
 fi
 #
-#move download to temporary directory
-mv $cwd/sdb64 $cwd/.sdb64tmp
+#
 cd $cwd/.sdb64tmp
 #
 # rev 0.9.0 need python dev to build, did we get it?
@@ -296,11 +296,20 @@ fi
 #
 # Copy saved directories if they exist
 if [ -d /home/sd/ACCOUNTS ]; then
-    echo Moved existing ACCOUNTS directory
     sudo rm -fr $sdsysdir/ACCOUNTS
     sudo mv /home/sd/ACCOUNTS $sdsysdir
+    echo Restored ACCOUNTS directory
 else
-    echo Saved Accounts Directory Does Not Exist
+    echo No ACCOUNTS backup directory exists
+fi
+#
+# Copy saved sd.conf file if it exists
+if [ -f /home/sd/sd.conf ]; then
+    sudo rm /etc/sd.conf
+    sudo mv /home/sd/sd.conf /etc
+    echo Restored sd.conf file
+else
+    echo No sd.conf backup file exists
 fi
 #
 #   Start SD server
