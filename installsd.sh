@@ -4,6 +4,7 @@
  #   This software is released under the Blue Oak Model License
  #   a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
  #
+ #   rev 1.0-2 xxx xx mab - echo -e to printf
  #   rev 1.0-1 Jan 14 dsm - added code to restore saved sd.conf file
  #   rev 1.0-0 Jan  8 dsm - slipstream to install on openSUSE and to use ~/.sdb64tmp as temporary
  #                          install directory and then delete it at end of install
@@ -35,12 +36,25 @@ tgroup=sdusers
 tuser=$USER
 cwd=$(pwd)
 sdsysdir="/usr/local/sdsys"
+# Define color codes as variables
+# note 90–97 Set bright foreground color aixterm (not in standard)
+# 91 - bright RED
+# 92 - bright GREEN
+# 93 - bright YELLOW
+# for now stick with standard
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+#
+NC='\033[0m' # No Color (reset)
+
 #
 clear
-echo -e "\e[91mSD installer\e[0m"
+printf "%bSD installer%b\n" "$RED" "$NC"
 echo -----------------------
 echo
-echo -e "\e[92mFor this install script to work you must have sudo installed"
+printf "%bFor this install script to work you must have sudo installed%b\n" "$GREEN" "$NC"
 echo "and be a member of the sudo group.  Also, systemd must be enabled."
 echo
 echo "Installer tested on Debian 13, Fedora 43, Manjaro 25 and Ubuntu 24.04."
@@ -48,7 +62,7 @@ echo
 echo "This script will download the SD source code, compile and install SD."
 echo
 #
-echo -e "\e[93m" 
+printf "%b\n" "$YELLOW"
 read -p "Continue? (y/N) " yn
 echo
 case $yn in
@@ -57,30 +71,31 @@ case $yn in
     * ) exit ;;
 esac
 #
-echo -e "\e[92m"
+printf "%b\n" "$GREEN"
 echo "If requested, enter your account password:"
-echo -e "\e[93m"
+printf "%b\n" "$YELLOW"
+#
 sudo date &>/dev/null
 clear
 echo
 rm -fr $cwd/.sdb64tmp
-echo -e "\e[0m"
+printf "%b\n" "$NC"
 #
 # Ask for distribution type
 is_arch=0
 is_debian=0
 is_fedora=0
 is_suse=0
-echo -e "\e[92mChoose your distribution."
+printf "%bChoose your distribution.\n" "$GREEN"
 echo
 echo " Enter <A> if you are istalling on an Arch based distribution." 
 echo " Enter <D> if you are installing on a Debian or Ubuntu based distribution."
 echo " Enter <F> if you are installing on a Fedora Based distribution."
 echo " Enter <S> if you are installing on an openSuse Based distribution."
 echo " Or press enter with no entry to exit the installer."
-echo -e "\e[93m"
+printf "%b\n" "$YELLOW"
 read -p "Continue? (a/d/f/s) " adfs
-echo -e "\e[0m"
+printf "%b\n" "$NC"
 case $adfs in
     [aA] ) is_arch=1;;
     [dD] ) is_debian=1;;
@@ -93,10 +108,10 @@ esac
 if [ $is_arch -eq 1 ]; then
     sudo pacman -S git base-devel micro lynx libbsd libsodium openssh python
     if [ $? -ne 0 ]; then
-        echo -e "\e[91m"
+        printf "%b\n" "$RED"
         echo "Package installation using pacman failed.  Exiting script."
         echo "Verify your internet connection and then try again."
-        echo -e "\e[0m"
+        printf "%b\n" "$NC"
         exit
     else   
         sudo systemctl start sshd
@@ -107,10 +122,10 @@ fi
 if [ $is_debian -eq 1 ]; then
     sudo apt-get -y install git build-essential micro lynx libbsd-dev libsodium-dev openssh-server python3-dev
     if [ $? -ne 0 ]; then
-        echo -e "\e[91m"
+        printf "%b\n" "$RED"
         echo "Package installation using apt-get failed.  Exiting script."
         echo "Verify your internet connection and then try again."
-        echo -e "\e[0m"
+        printf "%b\n" "$NC"
         exit
     fi
 fi
@@ -118,10 +133,10 @@ fi
 if [ $is_fedora -eq 1 ]; then
     sudo dnf -y install git make automake gcc gcc-c++ kernel-devel micro lynx libbsd-devel libsodium-devel openssh-server python3-devel
     if [ $? -ne 0 ]; then
-        echo -e "\e[91m"
+        printf "%b\n" "$RED"
         echo "Package installation using dnf failed.  Exiting script."
         echo "Verify your internet connection and then try again."
-        echo -e "\e[0m"
+        printf "%b\n" "$NC"
         exit
     fi
 fi
@@ -129,10 +144,10 @@ fi
 if [ $is_suse -eq 1 ]; then
     sudo zypper --non-interactive install git make automake gcc gcc-c++ kernel-default-devel micro-editor lynx libbsd-devel libsodium-devel openssh python3-devel
     if [ $? -ne 0 ]; then
-        echo -e "\e[91m"
+        printf "%b\n" "$RED"
         echo "Package installation using zypper failed.  Exiting script."
         echo "Verify your internet connection and then try again."
-        echo -e "\e[0m"
+        printf "%b\n" "$NC"
         exit
     fi
 fi
@@ -146,9 +161,9 @@ echo "using repo at: $REPO_URL"
 if [ $? -eq 0 ]; then
     echo "The Github repository at github.com is available."
     echo "Creating temporary source code repository."
-    echo -e "\e[93m"
+    printf "%b\n" "$YELLOW"
     read -p "Install the <M>ain or <D>evelopment version? (M/d) " md
-    echo -e "\e[0m"
+    printf "%b\n" "$NC"
     case $md in
         [mM] ) echo "Installing the main version."
                git clone -b main $REPO_URL .sdb64tmp;;
@@ -158,10 +173,10 @@ if [ $? -eq 0 ]; then
                git clone -b main $REPO_URL .sdb64tmp;;
     esac
 else
-    echo -e "\e[91m"
+    printf "%b\n" "$RED"
     echo "Sdb64 repository is not available."
     echo "Verify your internet connection and then try again."
-    echo -e "\e[0m"
+    printf "%b\n" "$NC"
     exit
 fi
 #
@@ -182,7 +197,7 @@ if [ $? -eq 0 ]; then
     # now create the include file we will use
     echo "#include <"$HDRS_STR"/Python.h>" > sd64/gplsrc/sdext_python_inc.h
 else
-    echo -e "\e[91mPython missing, Cannot build!\e[0m"
+    printf "%bPython missing, Cannot build!%b\n" "$RED" "$NC"
     exit
 fi
 #
@@ -193,9 +208,9 @@ sudo make
 if [ $? -eq 0 ]; then
     echo "Successful Build."
 else
-    echo -e "\e[91m"
+    printf "%b\n" "$RED"
     echo "Could not build SD. Install terminated!"
-    echo -e "\e[0m"
+    printf "%b\n" "$NC"
     exit
 fi
 #
@@ -216,9 +231,9 @@ sudo touch /usr/local/sdsys/gcat/\$CPROC
 sudo touch /usr/local/sdsys/errlog
 #
 # install TAPE and RESTORE system?
-echo -e "\e[93m"
+printf "%b\n" "$YELLOW"
 read -p "Install TAPE and RESTORE subsystem? (y/N) " yn
-echo -e "\e[0m"
+printf "%b\n" "$NC"
 case $yn in
     [yY] )  echo "Copying TAPE and RESTORE programs to GPL.BP."
             sudo cp tape/GPL.BP/* /usr/local/sdsys/GPL.BP
@@ -393,10 +408,10 @@ cd $cwd
 # display end of script message
 echo
 echo ---------------------------------------------------------------
-echo -e "\e[91mThe SD server is installed.\e[33m"
+printf "%bThe SD server is installed.%b\n" "$RED" "$YELLOW"
 echo "---------------------------"
 echo
-echo -e "\e[92mThe temporary source code directory used during the install"
+printf "%bThe temporary source code directory used during the install\n" "$GREEN" 
 echo "has been deleted."
 echo
 echo "The deletesd.sh script has been copied to the current directory."
@@ -412,13 +427,13 @@ echo "and the APIsrvr Service is enabled."
 echo "Note: In rare cases it requires two reboots for sd to autostart"
 #
 echo
-echo -e "After rebooting, open a terminal and enter \'sd\' "
+echo "After rebooting, open a terminal and enter \'sd\' "
 echo "to connect to your sd home directory."
 echo
-echo -e "\e[0m----------------------------------------------------------------"
-echo -e "\e[93m"
+printf "%b----------------------------------------------------------------\n" "$NC" 
+printf "%b\n" "$YELLOW"
 read -p "Restart Computer? (y/N) " yn
-echo -e "\e[0m"
+printf "%b\n" "$NC"
 case $yn in
     [yY] ) sudo reboot;;
     [nN] ) echo;;
