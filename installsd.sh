@@ -22,7 +22,34 @@
  #                        - sdsys's pri group now sdusers - note require sudo groupdel sdsys in deletesd.sh
  #                        - comment define statement in file sdsys/GPL.BP/define_install.h and recompile CPROC at end of install,
  #
- if [[ $EUID -eq 0 ]]; then
+
+
+# all important url of repo, change this to use your own fork
+REPO_URL="https://github.com/stringdatabase/sdb64"  
+# define where we expext to find the package
+dflt_git_folder=".sdb64tmp"
+dflt_local_folder="sdb64" 
+
+#function to test git repo availability
+repo_available() {
+# Attempt to list remote references silently
+  git ls-remote -q "$REPO_URL" &>/dev/null
+# Check the exit status of the previous command
+  if [ $? -eq 0 ]; then
+    echo "The Github repository at github.com is available."
+    echo "Creating temporary source code repository."
+    return 0
+  else
+    printf "%b\n" "$RED"
+    echo "Sdb64 repository is not available."
+    echo "Verify your internet connection and then try again."
+    printf "%b\n" "$NC"
+    exit
+  fi
+ 
+}
+ 
+if [[ $EUID -eq 0 ]]; then
     echo "This script must NOT be run as root" 1>&2
     exit
 fi
@@ -36,6 +63,7 @@ tgroup=sdusers
 tuser=$USER
 cwd=$(pwd)
 sdsysdir="/usr/local/sdsys"
+
 # Define color codes as variables
 # note 90–97 Set bright foreground color aixterm (not in standard)
 # 91 - bright RED
@@ -78,7 +106,7 @@ printf "%b\n" "$YELLOW"
 sudo date &>/dev/null
 clear
 echo
-rm -fr $cwd/.sdb64tmp
+rm -fr $cwd/$dflt_git_folder
 printf "%b\n" "$NC"
 #
 # Ask for distribution type
@@ -88,7 +116,7 @@ is_fedora=0
 is_suse=0
 printf "%bChoose your distribution.\n" "$GREEN"
 echo
-echo " Enter <A> if you are istalling on an Arch based distribution." 
+echo " Enter <A> if you are installing on an Arch based distribution." 
 echo " Enter <D> if you are installing on a Debian or Ubuntu based distribution."
 echo " Enter <F> if you are installing on a Fedora Based distribution."
 echo " Enter <S> if you are installing on an openSuse Based distribution."
@@ -151,37 +179,43 @@ if [ $is_suse -eq 1 ]; then
         exit
     fi
 fi
+
+printf "%b\n" "$YELLOW"
+read -p "Install From Github <M>ain, Github <D>evelopment or <L>ocal repo version? (M/D/L) " mdl
+printf "%b\n" "$NC"
 #
 # check that sdb64 repository is accessible
-REPO_URL="https://github.com/stringdatabase/sdb64" 
-echo "using repo at: $REPO_URL"
-# Attempt to list remote references silently
- git ls-remote -q "$REPO_URL" &>/dev/null
-# Check the exit status of the previous command
-if [ $? -eq 0 ]; then
-    echo "The Github repository at github.com is available."
-    echo "Creating temporary source code repository."
-    printf "%b\n" "$YELLOW"
-    read -p "Install the <M>ain or <D>evelopment version? (M/d) " md
-    printf "%b\n" "$NC"
-    case $md in
-        [mM] ) echo "Installing the main version."
-               git clone -b main $REPO_URL .sdb64tmp;;
-        [dD] ) echo "Installing the development version."
-               git clone -b dev $REPO_URL .sdb64tmp;;
-        * )    echo "Installing the main version."
-               git clone -b main $REPO_URL .sdb64tmp;;
-    esac
+
+
+case $mdl in
+    [mM] ) echo "Installing the main version at: $REPO_URL"
+           inst_folder=$dflt_git_folder
+           repo_available
+           git clone -b main $REPO_URL $inst_folder
+           ;;
+
+    [dD] ) echo "Installing the development versionat: $REPO_URL"
+           inst_folder=$dflt_git_folder
+           repo_available
+           git clone -b dev $REPO_URL $inst_folder
+           ;;
+
+    [lL] ) echo "Installing local repo found in $dflt_local_folder"
+           inst_folder=$dflt_local_folder
+           ;;
+    * )    echo "No Repo selected."
+           exit;;
+esac
+
+if [ -d "$inst_folder/sd64" ]; then
+    echo "Installing from $inst_folder."
 else
-    printf "%b\n" "$RED"
-    echo "Sdb64 repository is not available."
-    echo "Verify your internet connection and then try again."
-    printf "%b\n" "$NC"
+    echo "$inst_folder corrupt, abort"
     exit
 fi
+
 #
-#
-cd $cwd/.sdb64tmp
+cd $cwd/$inst_folder
 #
 # rev 0.9.0 need python dev to build, did we get it?
 python3 --version
@@ -201,7 +235,7 @@ else
     exit
 fi
 #
-cd $cwd/.sdb64tmp/sd64
+cd $cwd/$inst_folder/sd64
 #
 sudo make
 # rev 0.9.0 if make fails, abort install
@@ -281,7 +315,7 @@ if [ ! -d "$ACCT_PATH" ]; then
    sudo mkdir "$ACCT_PATH"/group_accounts
 fi  
 #
-# rev 0.9.3 always set ownership (these could get messed up if sdsys and sdusers group gets deleted during deletesd.sh script	
+# rev 0.9.3 always set ownership (these could get messed up if sdsys and sdusers group gets deleted during deletesd.sh script   
 sudo chown sdsys:sdusers "$ACCT_PATH"
 sudo chmod 775 "$ACCT_PATH"
 sudo chown sdsys:sdusers "$ACCT_PATH"/group_accounts
@@ -398,11 +432,15 @@ sudo $sdsysdir/bin/sd -stop
 #
 echo
 echo Compiling terminfo database
-sudo $cwd/.sdb64tmp/sd64/bin/sdtic -v $cwd/.sdb64tmp/sd64/terminfo.src
+sudo $cwd/$inst_folder/sd64/bin/sdtic -v $cwd/$inst_folder/sd64/terminfo.src
 echo Terminfo compilation complete
-sudo cp $cwd/.sdb64tmp/sd64/terminfo.src $sdsysdir
+sudo cp $cwd/$inst_folder/sd64/terminfo.src $sdsysdir
 echo
-rm -fr $cwd/.sdb64tmp
+
+if [ -d "$cwd/$dflt_git_folder" ]; then
+    echo "Remove $cwd/$dflt_git_folder"
+    rm -fr $cwd/$dflt_git_folder
+fi
 cd $cwd
 #
 # display end of script message
