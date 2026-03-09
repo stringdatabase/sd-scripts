@@ -25,8 +25,8 @@
 
 
 # all important url of repo, change this to use your own fork
-REPO_URL="https://github.com/mbullr/sdb64"
-#REPO_URL="https://github.com/stringdatabase/sdb64"  
+#REPO_URL="https://github.com/mbullr/sdb64"
+REPO_URL="https://github.com/stringdatabase/sdb64"  
 # define where we expect to find the package
 dflt_git_folder=".sdb64tmp"
 dflt_local_folder="sdb64" 
