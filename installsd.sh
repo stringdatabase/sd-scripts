@@ -4,7 +4,7 @@
  #   This software is released under the Blue Oak Model License
  #   a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
  #
- #   rev 1.0-2 xxx xx mab - echo -e to printf
+ #   rev 1.0-2 xxx xx mab - echo -e to printf, allow install from local repository
  #   rev 1.0-1 Jan 14 dsm - added code to restore saved sd.conf file
  #   rev 1.0-0 Jan  8 dsm - slipstream to install on openSUSE and to use ~/.sdb64tmp as temporary
  #                          install directory and then delete it at end of install
@@ -25,8 +25,9 @@
 
 
 # all important url of repo, change this to use your own fork
-REPO_URL="https://github.com/stringdatabase/sdb64"  
-# define where we expext to find the package
+REPO_URL="https://github.com/mbullr/sdb64"
+#REPO_URL="https://github.com/stringdatabase/sdb64"  
+# define where we expect to find the package
 dflt_git_folder=".sdb64tmp"
 dflt_local_folder="sdb64" 
 
@@ -82,8 +83,8 @@ clear
 printf "%bSD installer%b\n" "$RED" "$NC"
 echo -----------------------
 echo
-printf "%bFor this install script to work you must have sudo installed%b\n" "$GREEN" "$NC"
-echo "and be a member of the sudo group.  Also, systemd must be enabled."
+printf "%bFor this install script to work you must have sudo installed\n" "$GREEN" 
+printf "and be a member of the sudo group.  Also, systemd must be enabled.%b\n" "$NC"
 echo
 echo "Installer tested on Debian 13, Fedora 43, Manjaro 25 and Ubuntu 24.04."
 echo
@@ -180,8 +181,8 @@ if [ $is_suse -eq 1 ]; then
     fi
 fi
 
-printf "%b\n" "$YELLOW"
-read -p "Install From Github <M>ain, Github <D>evelopment or <L>ocal repo version? (M/D/L) " mdl
+printf "%bInstalling from GitHub repository $REPO_URL\n" "$YELLOW"
+read -p "Select <M>ain branch, <D>evelopment branch or <L>ocal repository? (M/D/L) " mdl
 printf "%b\n" "$NC"
 #
 # check that sdb64 repository is accessible
@@ -194,23 +195,23 @@ case $mdl in
            git clone -b main $REPO_URL $inst_folder
            ;;
 
-    [dD] ) echo "Installing the development versionat: $REPO_URL"
+    [dD] ) echo "Installing the development version at: $REPO_URL"
            inst_folder=$dflt_git_folder
            repo_available
            git clone -b dev $REPO_URL $inst_folder
            ;;
 
-    [lL] ) echo "Installing local repo found in $dflt_local_folder"
+    [lL] ) echo "Installing local repository found in $dflt_local_folder"
            inst_folder=$dflt_local_folder
            ;;
-    * )    echo "No Repo selected."
+    * )    echo "No matching selection, exit."
            exit;;
 esac
 
 if [ -d "$inst_folder/sd64" ]; then
     echo "Installing from $inst_folder."
 else
-    echo "$inst_folder corrupt, abort"
+    echo "$inst_folder not found or not an sd install repo, aborting"
     exit
 fi
 
@@ -478,3 +479,4 @@ case $yn in
     * ) echo ;;
 esac
 exit
+
