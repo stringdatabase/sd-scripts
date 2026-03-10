@@ -1,10 +1,10 @@
- #!/bin/bash
+  #!/bin/bash
  #   SD bash install script
  #   (c) 2023-2026 Donald Montaine and Mark Buller
  #   This software is released under the Blue Oak Model License
  #   a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
  #
- #   rev 1.0-2 xxx xx mab - echo -e to printf, allow install from local repository
+ #   rev 1.0-2 Mar 10 mab - echo -e to printf, allow install from local repository
  #   rev 1.0-1 Jan 14 dsm - added code to restore saved sd.conf file
  #   rev 1.0-0 Jan  8 dsm - slipstream to install on openSUSE and to use ~/.sdb64tmp as temporary
  #                          install directory and then delete it at end of install
@@ -25,7 +25,6 @@
 
 
 # all important url of repo, change this to use your own fork
-#REPO_URL="https://github.com/mbullr/sdb64"
 REPO_URL="https://github.com/stringdatabase/sdb64"  
 # define where we expect to find the package
 dflt_git_folder=".sdb64tmp"
@@ -452,9 +451,6 @@ echo "---------------------------"
 echo
 printf "%bThe temporary source code directory used during the install\n" "$GREEN" 
 echo "has been deleted."
-echo
-echo "The deletesd.sh script has been copied to the current directory."
-echo "Use it if you want to uninstall SD."
 echo
 echo "The /home/sd directory has been created."
 echo "User directories are created under /home/sd/user_accounts."
