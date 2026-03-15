@@ -1,15 +1,12 @@
 #!/bin/bash
 #
 # SD bash delete script
-# (c) 2023 Donald Montaine
-# This software is released under the Blue Oak Model License
-# a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
-# rev 1.0-2 Mar 10 2026 echo -e to printf, bug in config delete would remove accounts (/home/sd)
-#                       do not delete group sdusers if keeping accounts
-#                       Bug to fix ?? delete sdu_* and sdg_* groups if not saving accounts ??
-# rev 1.0.1 Jan 14 2026 Add retain config file, change prompts for retention of ACCOUNTS
-# rev 0.9.4 Dec 11 2025 Add color
-# rev 0.9.0 Jan 25 2025 mab must remove group sdsys (no longer sdsys's pri group)
+#   (c) 2023-2026 Donald Montaine and Mark Buller
+#   This software is released under the Blue Oak Model License
+#   a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
+#
+#   rev 2.0  Mar 15 2026 mab - echo -e to printf
+#   - prior history suppressed 
 #
 
 # Define color codes as variables
