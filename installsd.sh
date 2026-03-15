@@ -1,30 +1,15 @@
-  #!/bin/bash
- #   SD bash install script
- #   (c) 2023-2026 Donald Montaine and Mark Buller
- #   This software is released under the Blue Oak Model License
- #   a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
- #
- #   rev 1.0-2 Mar 10 mab - echo -e to printf, allow install from local repository
- #   rev 1.0-1 Jan 14 dsm - added code to restore saved sd.conf file
- #   rev 1.0-0 Jan  8 dsm - slipstream to install on openSUSE and to use ~/.sdb64tmp as temporary
- #                          install directory and then delete it at end of install
- #   rev 1.0-0 Dec 25 dsm - modified to handle Arch based distributions
- #   rev 0.9-4 Dec 16 dsm - manual choice of distro rather they trying to determine automatically
- #   rev 0.9-2 Nov 27 dsm - create one-stop install script
- #   rev 0.9-3 Nov 25 mab   update script to install from repo
- #                          move voc back to dynamic file
- #                          correct ownership issue with /home/sd when re installing and /home/sd already exists
- #   rev 0.9-1 Apr 25 mab - replace lsb_release with /etc/os-release - not installed by default on Fedora
- #   rev 0.9-1 Mar 25 mab - create generic install script and make corrections needed for Raspberry install
- #   rev 0.9-1 Mar 25 mab - add optional install of TAPE / RESTORE subsystem
- #   rev 0.9.0 Jan 25 mab - tighten up permissions
- #                        - build with embedded python
- #                        - sdsys's pri group now sdusers - note require sudo groupdel sdsys in deletesd.sh
- #                        - comment define statement in file sdsys/GPL.BP/define_install.h and recompile CPROC at end of install,
- #
+#!/bin/bash
+#   SD bash install script
+#   (c) 2023-2026 Donald Montaine and Mark Buller
+#   This software is released under the Blue Oak Model License
+#   a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
+#
+#   rev 2.0  Mar 15 2026 mab - echo -e to printf, allow install from local repository
+#   - prior history suppressed 
+#
 
 
-# all important url of repo, change this to use your own fork
+# all important url of repository, change this to use your own fork
 REPO_URL="https://github.com/stringdatabase/sdb64"  
 # define where we expect to find the package
 dflt_git_folder=".sdb64tmp"
@@ -87,7 +72,8 @@ printf "and be a member of the sudo group.  Also, systemd must be enabled.%b\n" 
 echo
 echo "Installer tested on Debian 13, Fedora 43, Manjaro 25 and Ubuntu 24.04."
 echo
-echo "This script will download the SD source code, compile and install SD."
+echo "This script will download the SD source code from the selected branch, compile and install SD."
+printf "If a local repository is found in %s, an option to perform an installation from the local repository is provided.\n" "$dflt_local_folder"
 echo
 #
 printf "%b\n" "$YELLOW"
@@ -98,6 +84,14 @@ case $yn in
     [nN] ) exit;;
     * ) exit ;;
 esac
+#
+# do we have a local repository?
+#
+if [ -d "$dflt_local_folder" ]; then
+    LOCAL_REPO=1
+else
+    LOCAL_REPO=0
+fi
 #
 printf "%b\n" "$GREEN"
 echo "If requested, enter your account password:"
@@ -180,8 +174,17 @@ if [ $is_suse -eq 1 ]; then
     fi
 fi
 
+echo
 printf "%bInstalling from GitHub repository $REPO_URL\n" "$YELLOW"
-read -p "Select <M>ain branch, <D>evelopment branch or <L>ocal repository? (M/D/L) " mdl
+echo "Select: "
+echo "  <M>ain branch."
+echo "  <D>evelopment branch."
+if [ $LOCAL_REPO -eq 1 ]; then
+    echo "  <L>ocal repository."
+    read -p "Select repository? (M/D/L) " mdl
+else
+    read -p "Select repository? (M/D) " mdl
+fi
 printf "%b\n" "$NC"
 #
 # check that sdb64 repository is accessible
