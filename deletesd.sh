@@ -4,32 +4,48 @@
 # (c) 2023 Donald Montaine
 # This software is released under the Blue Oak Model License
 # a copy can be found on the web here: https://blueoakcouncil.org/license/1.0.0
-#
+# rev 1.0-2 Mar 10 2026 echo -e to printf, bug in config delete would remove accounts (/home/sd)
+#                       do not delete group sdusers if keeping accounts
+#                       Bug to fix ?? delete sdu_* and sdg_* groups if not saving accounts ??
 # rev 1.0.1 Jan 14 2026 Add retain config file, change prompts for retention of ACCOUNTS
 # rev 0.9.4 Dec 11 2025 Add color
 # rev 0.9.0 Jan 25 2025 mab must remove group sdsys (no longer sdsys's pri group)
 #
+
+# Define color codes as variables
+# note 90–97 Set bright foreground color aixterm (not in standard)
+# 91 - bright RED
+# 92 - bright GREEN
+# 93 - bright YELLOW
+# for now stick with standard
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+#
+NC='\033[0m' # No Color (reset)
+
 if [[ $EUID -eq 0 ]]; then
-	echo -e "\e[91mThis script must NOT be run as root.\e[0m" 1>&2
-	exit
+    printf "%bThis script must NOT be run as root.%b\n" "$RED" "$NC" 1>&2
+    exit
 fi
 if [ -f  "/usr/local/sdsys/bin/sd" ]; then
-	echo
+    echo
 else
-	echo -e "\e[91mSD is not installed!"
-	echo -e "This script will not run.\e[0m"
-	exit
+    printf "%bSD is not installed!\n" "$RED"
+    printf "This script will not run.%b\n" "$NC"
+    exit
 fi
 #
 clear
-echo -e "\e[91mREMOVE the SD Database Completely"
+printf "%bREMOVE the SD Database Package\n" "$RED"
 echo    "---------------------------------------"
-echo -e "\e[93m"
+printf "%b\n" "$YELLOW"
 read -p "Continue? (y/N) " yn
 case $yn in
      [yY] ) echo;;
      [nN] ) exit;;
-     * ) exit ;;
+         *) exit ;;
 esac
 
 echo
@@ -37,43 +53,52 @@ echo "If requested, enter your account password:"
 sudo date &>/dev/null
 
 echo
-echo -e "\e[92mDo you want to save your existing accounts."
-echo "WARNING: Entering 'N' will delete all your exising accounts."
+printf "%bDo you want to save your existing accounts.\n" "$GREEN"
+echo "WARNING: Entering 'N' will delete all your existing accounts."
 echo         
-echo -e "\e[93m"
+printf "%b\n" "$YELLOW"
+keep_accts='KEEP'
 read -p "Keep your existing accounts? (Y/n) " yn
 case $yn in
-	[yY] )  echo
-		echo Accounts Directory Saved
-		sudo cp -r /usr/local/sdsys/ACCOUNTS /home/sd
-		ls /home/sd;;
-	[nN] )  echo
-	        echo /home/sd Directory Deleted
-		sudo rm -fr /home/sd;;
-	[*] )   echo
-		echo Accounts Directory Saved
-		sudo mv /usr/local/sdsys/ACCOUNTS /home/sd;;	        
+    [yY] ) echo
+           echo Accounts Directory Saved
+           sudo cp -r /usr/local/sdsys/ACCOUNTS /home/sd
+           ls /home/sd/ACCOUNTS;;
+    [nN] ) echo
+           read -p 'Enter "DELETE" to confirm deletion of Accounts ' keep_accts
+           if [ "$keep_accts" = "DELETE" ]; then
+               echo /home/sd Directory Deleted
+               sudo rm -fr /home/sd
+           else
+               echo Accounts Directory Saved
+               sudo cp -r /usr/local/sdsys/ACCOUNTS /home/sd
+               ls /home/sd/ACCOUNTS
+           fi
+           ;;
+    *)     echo
+           echo Accounts Directory Saved
+           sudo cp -r /usr/local/sdsys/ACCOUNTS /home/sd
+           ls /home/sd/ACCOUNTS;;
 esac
 
 echo
 echo
-echo -e "\e[92mDo you want to save your existing SD configuration."
+printf "%bDo you want to save your existing SD configuration.\n" "$GREEN"
 echo "WARNING: Entering 'N' will delete your current configuration."
 echo        
-echo -e "\e[93m"
+printf "%b\n" "$YELLOW"
 read -p "Keep your existing configuration? (Y/n) " yn
 case $yn in
-	[Yy] )  echo
-		sudo mv /etc/sd.conf /home/sd
-		echo Configuration file saved;;
-	[nN] )  echo
-		sudo rm -fr /home/sd
-		echo Configuration file deleted;;
-	[*] )   echo
-		sudo mv /etc/sd.conf /home/sd
-		echo Configuration file saved;;
+    [Yy] ) echo
+           sudo mv /etc/sd.conf /home/sd
+           echo Configuration file saved;;
+    [nN] ) echo
+           echo Configuration file will be deleted;;
+     *)    echo
+           sudo mv /etc/sd.conf /home/sd
+           echo Configuration file saved;;
 esac
-echo -e "\e[0m"
+printf "%b\n" "$NC"
 
 # remove the /usr/sdsys directory
 sudo rm -fr /usr/local/sdsys
@@ -82,13 +107,13 @@ echo "Removed /usr/local/sdsys directory."
 
 # remove the symbolic link to sd in /usr/local/bin or /usr/bin
 if [ -L "/usr/local/bin/sd" ]; then
-	sudo rm /usr/local/bin/sd
-	echo "Removed symbolic link /usr/local/bin/sd."
+    sudo rm /usr/local/bin/sd
+    echo "Removed symbolic link /usr/local/bin/sd."
 fi
 
 if [ -L "/usr/bin/sd" ]; then
-	sudo rm /usr/bin/sd
-	echo "Removed symbolic link /usr/bin/sd."
+    sudo rm /usr/bin/sd
+    echo "Removed symbolic link /usr/bin/sd."
 fi
 
 #remove config file
@@ -111,23 +136,32 @@ sudo rm /usr/lib/systemd/system/sdclient.socket
 sudo rm /usr/lib/systemd/system/sdclient@.service
 echo "Removed systemd service files."
 
-# remove sdsys user and sdusers group
-sudo userdel sdsys
-sudo groupdel sdusers
-sudo groupdel sdsys
+# remove sdsys and sdusers group only if deleting ACCOUNTS
 
-echo "Removed sdsys user and sdusers group."
+if [ "$keep_accts" = "DELETE" ]; then
+    sudo userdel sdsys
+    sudo groupdel sdusers
+    echo "Removed sdusers group."
+	sudo groupdel sdsys
+    echo "Removed sdsys group."
+	echo "Note: for complete clean up groups sdu_* and sdg_* may need to be manually removed"
+else
+    echo "sd ACCOUNTS were saved, therefore"
+	echo "user sdsys and group sdusers not deleted"
+	echo "The assumption is sd will be reinstalled"
+fi
 
-echo -e "\e[92m"
-echo "----------------------------------------------"
+
+printf "%b\n" "$GREEN"
+echo "----------------------------------------------------------------------"
 echo "The deletesd.sh script has completed."
-echo "Reboot to update user and group information."
-echo "----------------------------------------------"
-echo -e "\e[93m"
+echo "Reboot to update user and group information and prior to sd reinstall."
+echo "----------------------------------------------------------------------"
+printf "%b\n" "$YELLOW"
 read -p "Restart computer now? (y/N) " yn
 case $yn in
-	[yY] ) sudo reboot;;
-	[nN] ) echo;;
-	* ) echo ;;
+    [yY] ) sudo reboot;;
+    [nN] ) echo;;
+    * ) echo ;;
 esac
-echo -e "\e[0m"
+printf "%b\n" "$NC"
