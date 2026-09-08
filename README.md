@@ -1,5 +1,4 @@
 # sd-scripts
-Repository moved to https://codeberg.org/stringdatabase/sd-scripts
 
 sd install and delete scripts
 
