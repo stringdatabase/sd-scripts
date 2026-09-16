@@ -181,7 +181,7 @@ if [ $is_suse -eq 1 ]; then
 fi
 
 echo
-printf "%bInstalling from Codeberg repository $REPO_URL\n" "$YELLOW"
+printf "%bInstalling from Github repository $REPO_URL\n" "$YELLOW"
 echo "Select: "
 echo "  <M>ain branch."
 echo "  <D>evelopment branch."
