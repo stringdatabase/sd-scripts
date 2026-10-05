@@ -9,6 +9,7 @@
 #
 #   rev 2.1 Apr 27 2026 dsm - change git repository to codeberg.org
 #   rev 2.2 Sept 08 2026 mab - change git repository back to github
+#   rev 2.3 Oct 05 2026 mab - add PyGui branch selection
 #
 #
 
@@ -185,11 +186,12 @@ printf "%bInstalling from Github repository $REPO_URL\n" "$YELLOW"
 echo "Select: "
 echo "  <M>ain branch."
 echo "  <D>evelopment branch."
+echo "  <G>ui development branch."
 if [ $LOCAL_REPO -eq 1 ]; then
     echo "  <L>ocal repository."
-    read -p "Select repository? (M/D/L) " mdl
+    read -p "Select repository? (M/D/G/L) " mdl
 else
-    read -p "Select repository? (M/D) " mdl
+    read -p "Select repository? (M/D/G) " mdl
 fi
 printf "%b\n" "$NC"
 #
@@ -207,6 +209,12 @@ case $mdl in
            inst_folder=$dflt_git_folder
            repo_available
            git clone -b dev $REPO_URL $inst_folder
+           ;;
+    
+    [gG] ) echo "Installing the  GUI development version at: $REPO_URL"
+           inst_folder=$dflt_git_folder
+           repo_available
+           git clone -b PyGui $REPO_URL $inst_folder       
            ;;
 
     [lL] ) echo "Installing local repository found in $dflt_local_folder"
